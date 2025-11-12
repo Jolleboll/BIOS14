@@ -1,5 +1,5 @@
-Rscript scripts/chapter1.R
-# Rscript scripts/chapter2.R
+# Rscript scripts/chapter1.R
+Rscript scripts/chapter2.R
 # Rscript scripts/chapter3.R
 # Rscript scripts/chapter4.R
 # Rscript scripts/chapter5.R

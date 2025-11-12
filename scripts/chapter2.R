@@ -63,6 +63,115 @@ dev.off()
 
 options(echo = FALSE)
 
+# rm(list=ls())
+# options(echo = TRUE)
+
+# set.seed(1337)
+
+
+
+
+
+# x=rnorm(500,10,2) # N, mean, sd
+# y=0.4*x+rnorm(500,0,1) # Element-wise vector/matrix addition, very cool
+
+# m=lm(y~x)
+# # str(m) # Lists the contents of m, whatever m is, apparently
+# summary(m)
+
+# coefficients=m$co
+# strait=coefficients[1]+coefficients[2]*x # A vector containing the y-values
+# # predicted by the model m, mostly for plotting purposes, I think.
+# # Maybe some residuals calculations, too. Who knows.
+
+# pdf('optional.pdf',width=9,height=5)
+# par(mfrow=c(1,2))
+# plot(x,y,
+# 	las=1,
+# 	xlab='Leaf length (mm)',
+# 	ylab='Leaf width (mm)')
+# segments(x,y,x,strait,col="blue",lwd=0.1)
+
+# # abline(m,col="red") # Draws a line of infinite length
+# shortline_x=c(min(x),max(x))
+# shortline_y=coefficients[1]+coefficients[2]*shortline_x
+# lines(shortline_x,shortline_y,col='red') # Draws a line of finite length
+# # (You shouldn't do drugs or extrapolate)
+
+# hist(residuals(m),
+# 	las=1,
+# 	xlab='')
+
+# plot(m)
+# dev.off()
+
+
+
+
+# df=data.frame(x,y)
+
+# sampling_slopes=NULL
+# for(i in 1:50){
+# 	sample_i=df[sample(nrow(df),1000,replace=TRUE),]
+# 	linm=lm(sample_i$y~sample_i$x) # Should work
+# 	sampling_slopes[i]=linm$co[2]
+# }
+# summary(sampling_slopes)
+# slope_se=sd(sampling_slopes)
+# m$co
+# slope_se
+
+# coefficients[2]*(mean(x)+sd(x)) - coefficients[2]*mean(x)
+# cor(x,y)^2
+
+# coefficients[2]^2*var(x)
+
+
+# bird_df=read.csv("input/chapter2/bird_allometry.csv",header=TRUE)
+
+# m=lm(brain_mass ~ body_mass,bird_df)
+# summary(m)
+
+# coefficients=m$co
+# strait=coefficients[1]+coefficients[2]*bird_df$body_mass
+# x=bird_df$body_mass
+# y=bird_df$brain_mass
+
+# pdf('optional.pdf',width=9,height=5)
+# par(mfrow=c(1,2))
+# plot(x,y,
+# 	las=1,
+# 	xlab='Body mass (kg)',
+# 	ylab='Brain mass (kg)')
+# segments(x,y,x,strait,col="blue",lwd=0.1)
+
+# # abline(m,col="red") # Draws a line of infinite length
+# shortline_x=c(min(x),max(x))
+# shortline_y=coefficients[1]+coefficients[2]*shortline_x
+# lines(shortline_x,shortline_y,col='red') # Draws a line of finite length
+# # (You shouldn't do drugs or extrapolate)
+
+# hist(residuals(m),
+# 	las=1,
+# 	xlab='')
+
+# plot(m)
+# dev.off()
+
+
+
+# males = bird_df[bird_df$Sex=="m",]
+# females = bird_df[bird_df$Sex=="f",]
+# mm = lm(log(brain_mass)~log(body_mass), data=males)
+# mf = lm(log(brain_mass)~log(body_mass), data=females)
+
+
+# pdf('optional.pdf',width=9,height=5)
+# hist(residuals(mm))
+# dev.off()
+
+
+
 # birds = read.csv('input/bird_allometry.csv')
 # head(birds)
 
