@@ -1,27 +1,113 @@
+library(car)
+library(tidyverse)
+
+
 rm(list=ls())
 options(echo = TRUE)
 
-set.seed(1337)
-x1 = rnorm(200, 10, 4)
-x2 = 0.5*x1 + rnorm(200, 0, 2)
-y = 0.7*x1 + 2.2*x2 + 0.9*x1*x2 + rnorm(200, 0, 3)
-# y = 0.7*x1 + 2.2*x2 + rnorm(200, 0, 2)
-m = lm(y~x1*x2)
-coefs = summary(m)$coef
+plants=read.csv('input/alpineplants.csv',header=TRUE)
+plants=plants[plants$max_T_winter < 4,]
 
-summary(m)
-y_pred=coefs[1]+coefs[2][1]*x1+coefs[3][1]*x2+coefs[4][1]*x1*x2
-y_pred=coefs[1]+coefs[2][1]*mean(x1)+coefs[3][1]*mean(x2)+coefs[4][1]*x1*x2
-var(y_pred)/var(y)
-y_pred=coefs[1]+coefs[2][1]*x1+coefs[3][1]*mean(x2)+coefs[4][1]*mean(x1)*mean(x2)
-var(y_pred)/var(y)
-y_pred=coefs[1]+coefs[2][1]*mean(x1)+coefs[3][1]*x2+coefs[4][1]*mean(x1)*mean(x2)
-var(y_pred)/var(y)
-# This is r^2, the measure of 
-# how much of the response variance is predicted/explained
-# by the model
+# fc=quote(Carex.bigelowii~.-Thalictrum.alpinum-min_T_winter-mean_T_winter-mean_T_summer)
+fc=Carex.bigelowii~max_T_winter+mean_T_summer+max_T_summer+min_T_summer+light+snow+soil_moist+altitude
+# fc=Carex.bigelowii~light+snow++altitude
+ft=Thalictrum.alpinum~max_T_winter+mean_T_summer+max_T_summer+min_T_summer+light+snow+soil_moist+altitude
+# ft=Thalictrum.alpinum~light+snow+altitude
+# ft=quote(Thalictrum.alpinum~.-Carex.bigelowii-min_T_winter-mean_T_winter-mean_T_summer)
+mc=lm(fc,plants)
+mt=lm(ft,plants)
+
+# vif() calculates the VIF values for every predictor variable,
+# essentially doing a linear regression per predictor in turn,
+# each time pretending the predictor is the response. It is not
+# quite related to Pearson's r^2 but is still a measure of
+# correlation, kind of. VIF values higher than 3 are problematic.
+vif(mc)
+vif(mt)
 
 
+# summary(plants)
+summary(mc)
+summary(mt)
+
+svg('arrrrplot.svg',width=18,height=10,pointsize=16)
+par(mfrow=c(2,2))
+plot(mc)
+dev.off()
+
+svg('arrrrplot1.svg',width=18,height=10,pointsize=16)
+par(mfrow=c(3,3))
+plot(fc,plants,las=1,ylim=c(0,10))
+dev.off()
+
+svg('arrrrplot2.svg',width=18,height=10,pointsize=16)
+par(mfrow=c(3,3))
+plot(ft,plants,las=1,ylim=c(0,10))
+dev.off()
+
+
+plantsL=pivot_longer(plants,Carex.bigelowii:Thalictrum.alpinum,
+						names_to="species",
+						values_to="abundance")
+plantsL$species=as.factor(plantsL$species)
+head(plantsL)
+# summary(plantsL)
+
+# anova(lm(abundance~.^2,plantsL))
+
+nm=lm(abundance~ -1 + species*.,plantsL)
+anova(nm)
+summary(nm)
+# anova(~light+snow+altitude)
+
+options(echo=FALSE)
+ 
+
+# set.seed(1337)
+# x1 = rnorm(200, 10, 4)
+# # x2 = 0.5*x1 + rnorm(200, 0, 2)
+# x2 = rnorm(200, 7, 3)
+# xi=x1*x2
+
+# y = 0.7*x1 + 2.2*x2 + 0.9*xi + rnorm(200, 0, 3)
+# # y = 0.7*x1 + 2.2*x2 + rnorm(200, 0, 2)
+# m = lm(y~x1*x2)
+# coefs = summary(m)$coef
+
+# summary(m)
+
+# y_pred=coefs[1]+coefs[2][1]*x1+coefs[3][1]*x2+coefs[4][1]*x1*x2
+
+# y_pred1=coefs[1]+coefs[2][1]*mean(x1)+coefs[3][1]*mean(x2)+coefs[4][1]*x1*x2
+# y_pred2=coefs[1]+coefs[2][1]*x1+coefs[3][1]*mean(x2)+coefs[4][1]*mean(x1)*mean(x2)
+# y_pred3=coefs[1]+coefs[2][1]*mean(x1)+coefs[3][1]*x2+coefs[4][1]*mean(x1)*mean(x2)
+# var(y_pred1)/var(y_pred)
+# var(y_pred2)/var(y_pred)
+# var(y_pred3)/var(y_pred)
+
+# var_ypred=t(coefs[2:4,1]) %*% cov(cbind(x1,x2,xi)) %*% coefs[2:4,1]
+# var_ypred=t(coefs[4:4,1]) %*% cov(cbind(xi)) %*% coefs[4:4,1]
+# var_ypred=t(coefs[2:2,1]) %*% cov(cbind(x1)) %*% coefs[2:2,1]
+# var_ypred/var(y_pred)
+# var_ypred/var(y)
+
+# # r^2 is the measure of 
+# # how much of the response variance is predicted/explained
+# # by the model. It doesn't work here because the formula
+# # for adding more than two variances is a mess and I won't have it.
+
+
+# x1 = rnorm(200, 10, 4) ; x1z=scale(x1) #; x1=(x1-(mean(x1)))/sd(x1)
+# x2 = rnorm(200, 7, 3) ; x2z=scale(x2) #; x2=(x2-(mean(x2)))/sd(x2)
+# xi=x1*x2
+# xiz=x1z*x2z
+# # xi=x1*x2 ; xiz=(x1*x2-mean(x1)*x2-mean(x2)*x1+mean(x1)*mean(x2))/(sd(x1)*sd(x2))
+
+# y = 0.7*x1 + 2.2*x2 + 0.9*xi + rnorm(200, 0, 3)
+# # y = 0.7*x1z + 2.2*x2z + 0.9*xiz + rnorm(200, 0, 3)
+# m = lm(y~x1z*x2z)
+# coefs = summary(m)$coef
+# summary(m)
 
 options(echo=FALSE)
 
