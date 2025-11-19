@@ -1,66 +1,114 @@
-library(car)
+# library(car)
 library(tidyverse)
-
 
 rm(list=ls())
 options(echo = TRUE)
 
-plants=read.csv('input/alpineplants.csv',header=TRUE)
-plants=plants[plants$max_T_winter < 4,]
+logit = function(x) log(x/(1-x))
+invlogit = function(x) 1/(1+exp(-x))
 
-# fc=quote(Carex.bigelowii~.-Thalictrum.alpinum-min_T_winter-mean_T_winter-mean_T_summer)
-fc=Carex.bigelowii~max_T_winter+mean_T_summer+max_T_summer+min_T_summer+light+snow+soil_moist+altitude
-# fc=Carex.bigelowii~light+snow++altitude
-ft=Thalictrum.alpinum~max_T_winter+mean_T_summer+max_T_summer+min_T_summer+light+snow+soil_moist+altitude
-# ft=Thalictrum.alpinum~light+snow+altitude
-# ft=quote(Thalictrum.alpinum~.-Carex.bigelowii-min_T_winter-mean_T_winter-mean_T_summer)
-mc=lm(fc,plants)
-mt=lm(ft,plants)
+x = runif(5000)
+logit_x = logit(x)
 
-# vif() calculates the VIF values for every predictor variable,
-# essentially doing a linear regression per predictor in turn,
-# each time pretending the predictor is the response. It is not
-# quite related to Pearson's r^2 but is still a measure of
-# correlation, kind of. VIF values higher than 3 are problematic.
-vif(mc)
-vif(mt)
+x = rnorm(2000, 15, 3)
+eta = 1 + 0.4*x + rnorm(2000, 0, 3)
+p = invlogit(eta)
+y = rbinom(2000, 1, p)
+svg('arrrrplot.svg',width=18,height=10,pointsize=16)
+par(mfrow=c(1,3))
+plot(x, eta, las=1)
+plot(x, p, las=1)
+dev.off()
 
+m = glm(y~x, family=binomial(link="logit"))
+summary(m)
 
-# summary(plants)
-summary(mc)
-summary(mt)
+coefs = summary(m)$coef
+x_pred = seq(from=min(x)-10, to=max(x)+10, by=0.01)
+y_hat = coefs[1,1] + coefs[2,1]*x_pred
+p_hat = invlogit(y_hat)
+xofhalfy=(invlogit(0.5)-coefs[1,1])/coefs[2,1]
+
 
 svg('arrrrplot.svg',width=18,height=10,pointsize=16)
-par(mfrow=c(2,2))
-plot(mc)
+plot(x,y,las=1,pch='|',xlim=c(-20,20))
+lines(x_pred,p_hat)
+abline(v=xofhalfy,lty=3)
+abline(h=0.5,lty=3)
+
 dev.off()
 
-svg('arrrrplot1.svg',width=18,height=10,pointsize=16)
-par(mfrow=c(3,3))
-plot(fc,plants,las=1,ylim=c(0,10))
-dev.off()
-
-svg('arrrrplot2.svg',width=18,height=10,pointsize=16)
-par(mfrow=c(3,3))
-plot(ft,plants,las=1,ylim=c(0,10))
-dev.off()
+options(echo = FALSE)
+# svg('arrrrplot.svg',width=18,height=10,pointsize=16)
+# par(mfrow=c(2,2))
+# hist(x, las=1)
+# hist(logit_x, las=1)
 
 
-plantsL=pivot_longer(plants,Carex.bigelowii:Thalictrum.alpinum,
-						names_to="species",
-						values_to="abundance")
-plantsL$species=as.factor(plantsL$species)
-head(plantsL)
-# summary(plantsL)
+# xx = seq(-5, 5, 0.01)
+# plot(xx, invlogit(xx), type="l", las=1,xlab="Logit (x)",ylab="P")
+# plot(x, invlogit(logit_x), las=1)
+# dev.off()
 
-# anova(lm(abundance~.^2,plantsL))
 
-nm=lm(abundance~ -1 + species*.,plantsL)
-anova(nm)
-summary(nm)
-# anova(~light+snow+altitude)
+options(echo = FALSE)
 
-options(echo=FALSE)
+# plants=read.csv('input/alpineplants.csv',header=TRUE)
+# plants=plants[plants$max_T_winter < 4,]
+
+# # fc=quote(Carex.bigelowii~.-Thalictrum.alpinum-min_T_winter-mean_T_winter-mean_T_summer)
+# fc=Carex.bigelowii~max_T_winter+mean_T_summer+max_T_summer+min_T_summer+light+snow+soil_moist+altitude
+# # fc=Carex.bigelowii~light+snow++altitude
+# ft=Thalictrum.alpinum~max_T_winter+mean_T_summer+max_T_summer+min_T_summer+light+snow+soil_moist+altitude
+# # ft=Thalictrum.alpinum~light+snow+altitude
+# # ft=quote(Thalictrum.alpinum~.-Carex.bigelowii-min_T_winter-mean_T_winter-mean_T_summer)
+# mc=lm(fc,plants)
+# mt=lm(ft,plants)
+
+# # vif() calculates the VIF values for every predictor variable,
+# # essentially doing a linear regression per predictor in turn,
+# # each time pretending the predictor is the response. It is not
+# # quite related to Pearson's r^2 but is still a measure of
+# # correlation, kind of. VIF values higher than 3 are problematic.
+# vif(mc)
+# vif(mt)
+
+
+# # summary(plants)
+# summary(mc)
+# summary(mt)
+
+# svg('arrrrplot.svg',width=18,height=10,pointsize=16)
+# par(mfrow=c(2,2))
+# plot(mc)
+# dev.off()
+
+# svg('arrrrplot1.svg',width=18,height=10,pointsize=16)
+# par(mfrow=c(3,3))
+# plot(fc,plants,las=1,ylim=c(0,10))
+# dev.off()
+
+# svg('arrrrplot2.svg',width=18,height=10,pointsize=16)
+# par(mfrow=c(3,3))
+# plot(ft,plants,las=1,ylim=c(0,10))
+# dev.off()
+
+
+# plantsL=pivot_longer(plants,Carex.bigelowii:Thalictrum.alpinum,
+# 						names_to="species",
+# 						values_to="abundance")
+# plantsL$species=as.factor(plantsL$species)
+# head(plantsL)
+# # summary(plantsL)
+
+# # anova(lm(abundance~.^2,plantsL))
+
+# nm=lm(abundance~ -1 + species*.,plantsL)
+# anova(nm)
+# summary(nm)
+# # anova(~light+snow+altitude)
+
+# options(echo=FALSE)
  
 
 # set.seed(1337)
