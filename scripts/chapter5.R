@@ -7,6 +7,31 @@ options(echo = TRUE)
 logit = function(x) log(x/(1-x))
 invlogit = function(x) 1/(1+exp(-x))
 
+x = runif(500,0,20)
+# x = rnorm(500, 10, 5)
+eta = 1 + 0.15*x
+# eta = 1 + 0.15*x + rnorm(500, 0, 0.1)
+y1 = ceiling(exp(eta)+rpois(500,0.3))
+y2 = rpois(500,exp(eta))
+y2
+# y1 = ceiling(exp(eta))
+# y2 = ceiling(exp(eta))
+svg('arrrrplot.svg',width=18,height=8,pointsize=16)
+par(mfrow=c(1,3))
+plot(x, eta, las=1)
+plot(x, y1, las=1)
+plot(x, y2, las=1)
+dev.off()
+
+
+
+
+
+
+
+
+quit()
+
 x = runif(5000)
 logit_x = logit(x)
 
@@ -18,8 +43,9 @@ svg('arrrrplot.svg',width=18,height=10,pointsize=16)
 par(mfrow=c(1,3))
 plot(x, eta, las=1)
 plot(x, p, las=1)
+plot(x, y, pch='|',las=1)
 dev.off()
-
+# quit()
 m = glm(y~x, family=binomial(link="logit"))
 summary(m)
 
@@ -27,7 +53,7 @@ coefs = summary(m)$coef
 x_pred = seq(from=min(x)-10, to=max(x)+10, by=0.01)
 y_hat = coefs[1,1] + coefs[2,1]*x_pred
 p_hat = invlogit(y_hat)
-xofhalfy=(invlogit(0.5)-coefs[1,1])/coefs[2,1]
+xofhalfy=-coefs[1,1]/coefs[2,1]
 
 
 svg('arrrrplot.svg',width=18,height=10,pointsize=16)
@@ -35,7 +61,6 @@ plot(x,y,las=1,pch='|',xlim=c(-20,20))
 lines(x_pred,p_hat)
 abline(v=xofhalfy,lty=3)
 abline(h=0.5,lty=3)
-
 dev.off()
 
 options(echo = FALSE)
@@ -49,6 +74,17 @@ options(echo = FALSE)
 # plot(xx, invlogit(xx), type="l", las=1,xlab="Logit (x)",ylab="P")
 # plot(x, invlogit(logit_x), las=1)
 # dev.off()
+
+
+
+
+
+
+
+
+
+
+
 
 
 options(echo = FALSE)
